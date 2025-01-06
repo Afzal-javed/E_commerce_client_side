@@ -12,15 +12,17 @@ export const productSlice = createSlice({
     initialState,
     reducers: {
         setDataProduct: (state, action) => {
+            console.log("action",action.payload);
             state.productList = [...action.payload];
         },
         addCartItem: (state, action) => {
-            const check = state.cartItem.some((el) => el.id === action.payload.id);
+            // alert(JSON.stringify(action.payload));
+            const check = state.cartItem.some((el) => el?.id === action.payload?.id);
             if (check) {
-                toast("Item already added in cart");
+                toast.success("Item already added in cart");
             } else {
-                toast("Item added to cart successfully");
-                const totalValue = action.payload.price
+                toast.error("Item added to cart successfully");
+                const totalValue = action.payload.productPrice
                 state.cartItem = [...state.cartItem, { ...action.payload, qty: 1, totalValue: totalValue }]
                 console.log(state.cartItem);
             }

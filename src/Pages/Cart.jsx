@@ -5,6 +5,7 @@ import { deleteCartItem, increaseQty, decreaseQty } from '../redux/productSlice'
 import emptyCart from "../assets/empty-cart.jpg";
 const Cart = () => {
     const productCartData = useSelector((state) => state.product.cartItem)
+    console.log("productCartData", productCartData);
     const dispatch = useDispatch();
     const totalPrice = productCartData.reduce((acc, curr) => acc + parseInt(curr.totalValue), 0);
     const totalQty = productCartData.reduce((acc, curr) => acc + parseFloat(curr.qty), 0);

@@ -17,20 +17,64 @@ import { store, persistor } from './redux/index.js';
 import { PersistGate } from 'redux-persist/integration/react';
 import Cart from './Pages/Cart.jsx';
 import Update from './Pages/Update.jsx';
+import ProtectedRoute from './Component/ProtectedRoute.jsx';
+import PublicRoute from './Component/PublicRoute.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
 
     <Route path='/' element={<App />}>
-      <Route index element={<Home />} />
-      <Route path='/menu/:id' element={<Menu />} />
-      <Route path='/about' element={<About />} />
-      <Route path='/contact' element={<Contact />} />
-      <Route path='/login' element={<Login />} />
-      <Route path='/signup' element={<SignUp />} />
-      <Route path='/newproduct' element={<NewProduct />} />
-      <Route path='/cart' element={<Cart />} />
-      <Route path='/update/:id' element={<Update />} />
+       <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <PublicRoute>
+            <SignUp />
+          </PublicRoute>
+        }
+      />
+      <Route index path='/' element={
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      }/>
+      <Route path='/menu/:id' element={
+        <ProtectedRoute>
+          <Menu />
+        </ProtectedRoute>
+      }/>
+      <Route path='/about' element={
+        <ProtectedRoute>
+          <About />
+        </ProtectedRoute>
+      }/>
+      <Route path='/contact' element={
+        <ProtectedRoute>
+          <Contact />
+        </ProtectedRoute>
+      }/>
+      <Route path='/newproduct' element={
+        <ProtectedRoute>
+          <NewProduct/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/cart' element={
+        <ProtectedRoute>
+          <cart/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/update/:id' element={
+        <ProtectedRoute>
+          <Update/>
+        </ProtectedRoute>
+      }/>
       <Route path='/*' element={<PageNotFound />} />
     </Route>
 

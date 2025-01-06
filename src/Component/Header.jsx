@@ -3,7 +3,7 @@ import logo from "../assets/logo1.png"
 import { Link, } from 'react-router-dom'
 import UserAccount from './UserAccount'
 import SearchBar from './SearchBar'
-const Header = () => {
+const Header = ({seach, setSearch}) => {
     return (
         <header className='fixed w-full bg-white shadow-md h-16 px-2 md:px-4 z-10'>
             <div className='flex items-center justify-between'>

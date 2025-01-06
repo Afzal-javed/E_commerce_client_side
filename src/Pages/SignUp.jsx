@@ -4,10 +4,12 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from "react-hot-toast";
-import axios from "axios";
+import callAxios from '../../utils/axios';
 const SignUp = () => {
     const [isShowPassword, setIsShowPassword] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null);
+    const [showOtp, setShowOtp] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [url,setUrl]=useState("");
     const [data, setData] = useState({
         fullName: "",
         email: "",
@@ -23,26 +25,32 @@ const SignUp = () => {
             }
         })
     }
+    const verifyOtp=async()=>{
+        try {
+            await callAxios("post","user/verifyOTP",{
+                otp: otp
+            })
+            toast?.success("OTP verified successfully");
+            navigate("/login");
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.msg||"Something went wrong");
+        }
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData();
-        if (selectedImage) {
-            formData.append('profile', selectedImage, selectedImage.name);
-        }
-        formData.append('fullName', data.fullName);
-        formData.append('email', data.email);
-        formData.append('password', data.password);
+       
         try {
-            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/user/register`, formData, {
-                headers: {
-                    "Content-Type": 'multipart/form-data'
-                }
-            })
-            if (response?.status === 200) {
-                toast("User register successfully");
-                localStorage.setItem('user:detail', JSON.stringify(response?.data?.newUser));
-                navigate("/login");
-            }
+           const payload={
+               name:data.fullName,
+               email:data.email,
+               password:data.password,
+               profile: url,
+               role:"USER"
+           }
+            const res = await callAxios("post", "user/sendOTP", payload);
+           toast?.success(res?.msg||"OTP sent successfully");
+           setShowOtp(true);
         } catch (error) {
             if (error?.response?.status === 400) {
                 toast(error?.response?.data?.msg);
@@ -51,21 +59,32 @@ const SignUp = () => {
             }
         }
     }
-    const handleImageChange = (e) => {
+    const handleImageChange = async(e) => {
         const file = e.target.files[0];
-        if (file) {
-            setSelectedImage(file);
-        }
+        console.log(file)
+        try {
+            if (file) {
+                const formData=new FormData();
+                formData.append('file',file);
+                const res = await callAxios("post", 'upload/singleFileUpload', formData);
+                setUrl(res?.url);
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error(error?.response?.data?.msg||"Something went wrong");
+            setUrl("")
+        } 
+       
     }
     return (
         <div className='p-3 md:p-4'>
-            <div className='w-full max-w-sm bg-white m-auto flex items-center flex-col p-4 rounded-xl'>
+          {!showOtp ?   <div className='w-full max-w-sm bg-white m-auto flex items-center flex-col p-4 rounded-xl'>
                 <h2 className='text-2xl font-bold mb-1'>Welcome</h2>
                 <h4 className='text-lg mb-1'>Sign Up</h4>
                 <div className='w-20 overflow-hidden rounded-full drop-shadow-md shadow-md m-auto relative'>
                     {
-                        selectedImage ?
-                            <img src={URL.createObjectURL(selectedImage)}
+                        url ?
+                            <img src={url}
                                 alt='profile'
                                 className='w-full h-[80px] object-cover rounded-full' /> :
                             <>
@@ -102,7 +121,22 @@ const SignUp = () => {
                     </div>
                 </form>
 
+            </div> :
+                <div className='w-full max-w-sm bg-white m-auto flex items-start flex-col p-4 rounded-xl'>
+                    <h1 className='text-2xl font-bold w-full text-center'>OTP</h1>
+                    <div className='w-full flex flex-col items-start'>
+
+                    <label htmlFor='fullName'>OTP</label>
+                    <input type='number' id='fullName'  value={otp} onChange={(e)=>setOtp(e.target.value)} className='mt-2 mb-2 w-full bg-slate-300 p-1 border-none outline-none rounded-lg' placeholder='Enter OTP' />
+                    </div>
+                    <div className=' w-full flex items-center justify-center mt-3'>
+                        <button type='submit' className='bg-[darkslategray] hover:bg-[lightblue] hover:text-black p-1.5 w-[35%] text-white rounded-full' onClick={verifyOtp}>Submit</button>
+                    </div>
+                    <div className='flex items-center justify-center mt-2'>
+                        <p className='text-lg'> Back to Sign In ? <span className=' text-[darkblue] cursor-pointer' onClick={()=>setShowOtp(false)}>Sign In</span></p>
+                    </div>
             </div>
+            }
         </div>
     )
 }

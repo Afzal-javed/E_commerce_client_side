@@ -7,6 +7,7 @@ import { toast } from "react-hot-toast";
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginRedux } from '../redux/userSlice';
+import callAxios from '../../utils/axios';
 const Login = () => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user:detail')));
     const [isShowPassword, setIsShowPassword] = useState(false);
@@ -36,19 +37,16 @@ const Login = () => {
             password: data?.password
         }
         try {
-            const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/user/login`, userData);
-            if (response?.data?.token) {
-                localStorage.setItem('user:detail', JSON.stringify(response?.data?.user));
-                localStorage.setItem('user:token', JSON.stringify(response?.data?.token));
-                toast(user?.fullName + " login Successfully");
-            }
-            dispatch(loginRedux({ data: { id: response?.data?.user?.id, email: response?.data?.user?.email, fullName: response?.data?.user?.fullName, profile: response?.data?.user?.profile } }));
+            const response = await callAxios("post", `user/login`, userData);
+               localStorage.setItem('user:detail', JSON.stringify(response?.user));
+                toast.success(response?.msg);
+            dispatch(loginRedux(response?.user));
             navigate("/");
         } catch (error) {
             if (error?.response?.status === 400) {
-                toast(error?.response?.data?.msg);
+                toast.error(error?.response?.data?.msg);
             } else if (error?.response?.status === 500) {
-                toast(error?.response?.data?.msg);
+                toast.error(error?.response?.data?.msg);
             }
             console.log("Error " + error?.response);
         }
