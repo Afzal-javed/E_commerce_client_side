@@ -67,7 +67,7 @@ const router = createBrowserRouter(
       }/>
       <Route path='/cart' element={
         <ProtectedRoute>
-          <cart/>
+          <Cart/>
         </ProtectedRoute>
       }/>
       <Route path='/update/:id' element={

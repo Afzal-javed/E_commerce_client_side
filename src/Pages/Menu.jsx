@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import ItemCard from "../Component/ItemCard";
 import { addCartItem } from "../redux/productSlice";
-import { fetchProducts } from "../../utils/fetchProducts";
+import { addToCart, fetchProducts } from "../../utils/fetchProducts";
 import toast from "react-hot-toast";
+import callAxios from "../../utils/axios";
 
 const Menu = () => {
-  // const productData = useSelector((state) => state.product)
+  const products = useSelector((state) => state.product)
+  console.log("products",products);
   const filterId = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -48,6 +50,21 @@ const Menu = () => {
       })
     );
   };
+
+  const saveProductItemToCart=async(id)=>{
+    try {
+      const payload={
+        productId:id,
+        quantity:1
+      }
+      const res=await addToCart(payload);
+      toast.success("Item added to cart successfully");
+    } catch (error) {
+      console.log("error",error);
+      toast.error(error.response.data.message)
+    }
+  }
+
   const handleNextPage = () => {
     if (page < totalPage) {
       setPage(page + 1);
@@ -59,6 +76,7 @@ const Menu = () => {
       setPage(page - 1);
     }
   };
+  console.log("product",productFilterById);
   return (
     <div className="w-full p-3 md:p-5">
       {filterId.id !== "null" ? (
@@ -84,7 +102,7 @@ const Menu = () => {
                 </button>
                 <button
                   className="bg-yellow-600 w-[100px] p-1.5 rounded-full text-white my-1.5 hover:bg-slate-200 hover:text-black"
-                  onClick={handleCartItem}
+                  onClick={saveProductItemToCart}
                 >
                   Add to Cart
                 </button>
@@ -111,6 +129,7 @@ const Menu = () => {
                       productImage={product?.productImage}
                       price={product?.productPrice}
                       description={product?.productDescription}
+                      saveProductItemToCart={saveProductItemToCart}
                     />
                   </div>
                 );
@@ -137,6 +156,7 @@ const Menu = () => {
                       productImage={product?.productImage}
                       price={product?.productPrice}
                       description={product?.productDescription}
+                      saveProductItemToCart={saveProductItemToCart}
                     />
                   </div>
                 );

@@ -37,7 +37,8 @@ const Login = () => {
             password: data?.password
         }
         try {
-            const response = await callAxios("post", `user/login`, userData);
+            const response = await callAxios("post", `user/login`, userData,true);
+
                localStorage.setItem('user:detail', JSON.stringify(response?.user));
                 toast.success(response?.msg);
             dispatch(loginRedux(response?.user));
@@ -48,7 +49,7 @@ const Login = () => {
             } else if (error?.response?.status === 500) {
                 toast.error(error?.response?.data?.msg);
             }
-            console.log("Error " + error?.response);
+            console.log("Error " , error);
         }
 
     }

@@ -20,6 +20,7 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const response=await fetchProducts(limit, page);
+        console.log("response",response);
         setPage(response?.currentPage);
         setTotalPage(response?.totalPages);
         dispatch(setDataProduct(response?.data));

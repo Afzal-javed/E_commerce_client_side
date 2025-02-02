@@ -1,43 +1,104 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AiOutlinePlusCircle, AiOutlineMinusCircle, AiOutlineDelete } from "react-icons/ai";
 import { deleteCartItem, increaseQty, decreaseQty } from '../redux/productSlice';
 import emptyCart from "../assets/empty-cart.jpg";
+import { createOrder, getCart, verifyPayment } from '../../utils/fetchProducts';
+import toast from 'react-hot-toast';
 const Cart = () => {
+    const [cartItems,setCartItems]=React.useState([]);
     const productCartData = useSelector((state) => state.product.cartItem)
     console.log("productCartData", productCartData);
     const dispatch = useDispatch();
     const totalPrice = productCartData.reduce((acc, curr) => acc + parseInt(curr.totalValue), 0);
     const totalQty = productCartData.reduce((acc, curr) => acc + parseFloat(curr.qty), 0);
+    const cartItem=async()=>{
+        const res=await getCart();
+        setCartItems(res?.data);
+    }
+    useEffect(()=>{
+        cartItem();
+    },[])
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }, []);
+    const buyNow=async()=>{
+        try {
+            const payload={
+                cartId:cartItems?._id,
+                addressId:"679f489d8f5598816fd7905d",
+            }
+            const res=await createOrder(payload);
+            if (!res?.razorpayOrder || !res?.order) {
+                toast.error("Failed to create Razorpay order");
+                return;
+              }
+              else{
+                const options = {
+                    key: import.meta.env.VITE__PUBLIC_RAZORPAY_KEY_ID,
+                    amount: res?.order?.totalAmount,
+                    currency: "INR",
+                    name: "My Ecommerce Store",
+                    description: "Afzal's Products",
+                    order_id: res?.razorpayOrder?.id,
+                    handler: async (response) => {
+                      const verifyRes = await verifyPayment(response);
+                      if (verifyRes.success) {
+                        toast.success("Payment successful!");
+                      } else {
+                        toast.error("Payment verification failed");
+                      }
+                    },
+                    prefill: {
+                      name: "Afzal Javed",
+                      email: "afzal.javed@applore.in",
+                      contact: "8009205951",
+                    },
+                    theme: {
+                      color: "#F37254",
+                    },
+                  };
+              
+                  const razorpay = new window.Razorpay(options);
+                  razorpay.open();
+              }
+        } catch (error) {
+            console.log("error",error);
+            toast.error(error?.response?.data?.msg||"Something went wrong");
+        }
+    }
+    console.log("cartItems",cartItems);
     return (
-        <div className={`p-1 md:p-5 ${productCartData.length > 0 ? '' : 'bg-white h-screen'}`}>
-
+        <div className={`p-1 md:p-5 ${cartItems ? '' : 'bg-white h-screen'}`}>
             {
-                productCartData.length > 0 ?
+                cartItems?.products?.length > 0 ?
                     <>
 
                         <h1 className='text-3xl mt-2 font-bold'>Your Cart <span className='text-red-800'>Items</span> </h1>
                         <div className='flex flex-col md:flex-row gap-2'>
                             <div className='mt-3 md:mt-6 md:w-[50rem] flex flex-col items-center overflow-y-auto max-h-[80vh] scroll-smooth '>
                                 {
-                                    productCartData?.map((product, index) => {
+                                    cartItems?.products?.map((product, index) => {
                                         return (
                                             <div key={index} className='bg-slate-700 shadow-lg text-white cursor-default max-w-[42rem] flex items-center gap-3 rounded-lg my-2 md:my-4 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300' >
                                                 <div className='w-[35%] rounded-l-lg bg-white'>
-                                                    <img src={product?.productImage} alt='productImage' />
+                                                    <img src={product?.productId?.productImage} alt='productImage' />
                                                 </div>
                                                 <div className='p-3 w-[60%]'>
                                                     <div className='flex items-center justify-between'>
-                                                        <p className='text-2xl font-semibold'>{product?.productName}</p>
+                                                        <p className='text-2xl font-semibold'>{product?.productId?.productName}</p>
                                                         <div className='text-2xl font-semibold cursor-pointer hover:text-red-600' onClick={() => dispatch(deleteCartItem(product?.id))}>
                                                             <AiOutlineDelete />
                                                         </div>
                                                     </div>
-                                                    <p className='text-lg mt-2 font-semibold text-slate-200'>{product?.catagory}</p>
-                                                    <p className='text-xl mt-2 font-semibold'><span className='text-red-600'>₹ </span>{product?.price}</p>
+                                                    <p className='text-lg mt-2 font-semibold text-slate-200'>{product?.productId?.productCategory}</p>
+                                                    <p className='text-xl mt-2 font-semibold'><span className='text-red-600'>₹ </span>{product?.productId?.productPrice}</p>
                                                     <div className='w-full flex items-center justify-between '>
                                                         <span className='flex items-center gap-3 text-lg cursor-pointer'><AiOutlineMinusCircle onClick={() => dispatch(decreaseQty(product?.id))} />{product?.qty}<AiOutlinePlusCircle onClick={() => dispatch(increaseQty(product?.id))} /></span>
-                                                        <span className=' text-red-600 text-xl flex font-bold'>Total : <span className='text-black ml-1'> ₹</span><p className='text-white ml-1'>{product?.totalValue}</p></span>
+                                                        <span className=' text-red-600 text-xl flex font-bold'>Total : <span className='text-black ml-1'> ₹</span><p className='text-white ml-1'>{product?.productId?.productPrice*product?.quantity}</p></span>
                                                     </div>
 
                                                 </div>
@@ -54,13 +115,13 @@ const Cart = () => {
                                     </div>
                                     <hr />
                                     <div className='p-5'>
-                                        <p className='text-xl text-slate-800 flex items-center my-2 justify-between font-semibold'>Total Quantity : <span className='text-black font-bold'>{totalQty}</span> </p>
+                                        <p className='text-xl text-slate-800 flex items-center my-2 justify-between font-semibold'>Total Quantity : <span className='text-black font-bold'>{cartItems?.totalAmount}</span> </p>
 
-                                        <p className='text-xl text-slate-800 flex items-center my-2 justify-between font-semibold'>Total Price : <span className='text-black font-bold'><span className='text-red-700 ml-1'> ₹</span> {totalPrice}</span> </p>
+                                        <p className='text-xl text-slate-800 flex items-center my-2 justify-between font-semibold'>Total Price : <span className='text-black font-bold'><span className='text-red-700 ml-1'> ₹</span> {cartItems?.totalAmount}</span> </p>
 
                                     </div>
                                     <div className='text-center p-2 text-white rounded-b-xl cursor-pointer hover:bg-slate-700 bg-red-700 '>
-                                        <button className='text-xl font-bold'>Payment</button>
+                                        <button className='text-xl font-bold' onClick={buyNow}>Payment</button>
                                     </div>
                                 </div>
                             </div>

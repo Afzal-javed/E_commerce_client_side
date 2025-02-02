@@ -4,7 +4,7 @@ import { addCartItem } from '../redux/productSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import UpdateAndDelete from './UpdateAndDelete'
 
-const ItemCard = ({ id, productName, category, price, productImage, description }) => {
+const ItemCard = ({ id, productName, category, price, productImage, description,saveProductItemToCart }) => {
     const dispatch = useDispatch();
     const userData = useSelector((state) => state.user);
     const [deleted, setDeleted] = useState(false);
@@ -39,7 +39,14 @@ const ItemCard = ({ id, productName, category, price, productImage, description 
                             {
                                 userData.email === "afzaljaved59832@gmail.com" ?
                                     <UpdateAndDelete id={id} onDelete={handleDelete} /> :
-                                    <button className='bg-yellow-600 w-[160px] p-1.5 rounded-full text-white my-1.5 hover:bg-slate-200 hover:text-black' onClick={handleCartItem}>Add to Cart</button>
+                                    <button className='bg-yellow-600 w-[160px] p-1.5 rounded-full text-white my-1.5 hover:bg-slate-200 hover:text-black' onClick={()=>{
+                                        if (typeof saveProductItemToCart === 'function') {
+                                            saveProductItemToCart(id);
+                                            handleCartItem();
+                                          } else {
+                                            console.error("saveProductItemToCart is not a function");
+                                          }
+                                    }}>Add to Cart</button>
                             }
                         </div>
                     </div>
