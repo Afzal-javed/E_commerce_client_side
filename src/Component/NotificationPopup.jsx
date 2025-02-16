@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const NotificationPopup = ({ notification, onClose }) => {
   const router = useNavigate();
-  const { title, body, link } = notification;
+  const { title, body, link,time } = notification;
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {

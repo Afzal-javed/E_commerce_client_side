@@ -24,7 +24,8 @@ export const listenForNotifications = (callback) => {
       const notification = {
         title: payload.notification?.title || "No Title",
         body: payload.notification?.body || "No Body",
-        link: payload?.data?.link || "/",
+        time:payload?.data?.timestamp,
+        link: payload?.data?.ctaUrl || "/",
       };
   
       callback(notification);
