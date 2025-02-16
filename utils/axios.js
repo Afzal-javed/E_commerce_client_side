@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
+    // baseURL: 'https://ecommerce-backend-coral-seven.vercel.app/api',
+
     baseURL: 'http://localhost:9000/api',
+   
     timeout: 30000,
     withCredentials: true,
     headers: {
@@ -17,7 +20,6 @@ const callAxios = async (method, url, body = null, includeCookies = true) => {
                 'Accept': 'application/json'
             }
         };
-
         switch (method.toLowerCase()) {
             case 'get':
                 return (await axiosInstance.get(url, config)).data;

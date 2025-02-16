@@ -14,8 +14,9 @@ const Cart = () => {
     const totalQty = productCartData.reduce((acc, curr) => acc + parseFloat(curr.qty), 0);
     const cartItem=async()=>{
         const res=await getCart();
-        setCartItems(res?.data);
+        setCartItems(res?.data[0]);
     }
+    console.log("cartItems",cartItems);
     useEffect(()=>{
         cartItem();
     },[])
@@ -32,11 +33,12 @@ const Cart = () => {
                 addressId:"679f489d8f5598816fd7905d",
             }
             const res=await createOrder(payload);
-            if (!res?.razorpayOrder || !res?.order) {
+            if (!res?.razorpayOrder) {
                 toast.error("Failed to create Razorpay order");
                 return;
               }
               else{
+                console.log("res",res);
                 const options = {
                     key: import.meta.env.VITE__PUBLIC_RAZORPAY_KEY_ID,
                     amount: res?.order?.totalAmount,
@@ -70,7 +72,6 @@ const Cart = () => {
             toast.error(error?.response?.data?.msg||"Something went wrong");
         }
     }
-    console.log("cartItems",cartItems);
     return (
         <div className={`p-1 md:p-5 ${cartItems ? '' : 'bg-white h-screen'}`}>
             {
@@ -85,20 +86,20 @@ const Cart = () => {
                                         return (
                                             <div key={index} className='bg-slate-700 shadow-lg text-white cursor-default max-w-[42rem] flex items-center gap-3 rounded-lg my-2 md:my-4 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110  duration-300' >
                                                 <div className='w-[35%] rounded-l-lg bg-white'>
-                                                    <img src={product?.productId?.productImage} alt='productImage' />
+                                                    <img src={product?.productImage} alt='productImage' />
                                                 </div>
                                                 <div className='p-3 w-[60%]'>
                                                     <div className='flex items-center justify-between'>
-                                                        <p className='text-2xl font-semibold'>{product?.productId?.productName}</p>
-                                                        <div className='text-2xl font-semibold cursor-pointer hover:text-red-600' onClick={() => dispatch(deleteCartItem(product?.id))}>
+                                                        <p className='text-2xl font-semibold'>{product?.productName}</p>
+                                                        <div className='text-2xl font-semibold cursor-pointer hover:text-red-600' onClick={() => dispatch(deleteCartItem(product?._id))}>
                                                             <AiOutlineDelete />
                                                         </div>
                                                     </div>
-                                                    <p className='text-lg mt-2 font-semibold text-slate-200'>{product?.productId?.productCategory}</p>
-                                                    <p className='text-xl mt-2 font-semibold'><span className='text-red-600'>₹ </span>{product?.productId?.productPrice}</p>
+                                                    <p className='text-lg mt-2 font-semibold text-slate-200'>{product?.productCategory}</p>
+                                                    <p className='text-xl mt-2 font-semibold'><span className='text-red-600'>₹ </span>{product?.productPrice}</p>
                                                     <div className='w-full flex items-center justify-between '>
                                                         <span className='flex items-center gap-3 text-lg cursor-pointer'><AiOutlineMinusCircle onClick={() => dispatch(decreaseQty(product?.id))} />{product?.qty}<AiOutlinePlusCircle onClick={() => dispatch(increaseQty(product?.id))} /></span>
-                                                        <span className=' text-red-600 text-xl flex font-bold'>Total : <span className='text-black ml-1'> ₹</span><p className='text-white ml-1'>{product?.productId?.productPrice*product?.quantity}</p></span>
+                                                        <span className=' text-red-600 text-xl flex font-bold'>Total : <span className='text-black ml-1'> ₹</span><p className='text-white ml-1'>{product?.productPrice*product?.orderedQuantity}</p></span>
                                                     </div>
 
                                                 </div>
