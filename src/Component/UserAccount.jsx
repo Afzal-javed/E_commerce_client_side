@@ -75,6 +75,9 @@ const UserAccount = () => {
                                         <Link to={"/contact"} className='px-1 py-0.5'>Contact</Link>
                                     </nav>
 
+                                    <Link className='w-[93px]  mt-1  text-center whitespace-nowrap cursor-pointer' to={"/orders"}>My Orders</Link>
+                                    <Link className='w-[93px]  mt-1  text-center whitespace-nowrap cursor-pointer' to={"/assign-order"}>Assigned Orders</Link>
+                                    <Link className='w-[93px]  mt-1  text-center whitespace-nowrap cursor-pointer' to={"/sell-products"}>Sold Products</Link>
                                     <p className='w-[93px]  mt-1  text-center whitespace-nowrap cursor-pointer' onClick={handleLogout}>Logout</p>
                                 </>
                                 :

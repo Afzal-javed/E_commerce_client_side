@@ -19,6 +19,10 @@ import Cart from './Pages/Cart.jsx';
 import Update from './Pages/Update.jsx';
 import ProtectedRoute from './Component/ProtectedRoute.jsx';
 import PublicRoute from './Component/PublicRoute.jsx';
+import Orders from './Pages/Orders.jsx';
+import SellProducts from './Pages/SellProducts.jsx';
+import AssignOrder from './Pages/AssignOrder.jsx';
+import { SocketProvider } from './Component/SocketProvider.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -75,6 +79,21 @@ const router = createBrowserRouter(
           <Update/>
         </ProtectedRoute>
       }/>
+      <Route path='/orders' element={
+        <ProtectedRoute>
+          <Orders/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/sell-products' element={
+        <ProtectedRoute>
+          <SellProducts/>
+        </ProtectedRoute>
+      }/>
+      <Route path='/assign-order' element={
+        <ProtectedRoute>
+          <AssignOrder/>
+        </ProtectedRoute>
+      }/>
       <Route path='/*' element={<PageNotFound />} />
     </Route>
 
@@ -82,10 +101,12 @@ const router = createBrowserRouter(
 )
 
 ReactDOM.createRoot(document.getElementById('root')).render(
+  <SocketProvider>
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <RouterProvider router={router} />
     </PersistGate>
   </Provider>
+  </SocketProvider>
 
 )
